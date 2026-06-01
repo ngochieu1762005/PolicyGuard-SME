@@ -49,6 +49,7 @@ How to Run
 
 1. Clone the project
 
+
 ```
 git clone https://github.com/ngochieu1762005/PolicyGuard-SME
 cd policyguard_sme_project
@@ -77,6 +78,8 @@ You can also run the project using:
 ```
 run_app.bat
 ```
+
+
 Run on Linux or macOS
 
 ```
