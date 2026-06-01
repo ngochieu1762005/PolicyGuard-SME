@@ -1,0 +1,7 @@
+source_id,title,organization,url,used_for
+SRC001,Law on Support for Small- and Medium-sized Enterprises,National Assembly / public legal source,https://www.toaan.gov.vn/webcenter/portal/spc/document-detail?Keyword=&dDocName=TOAAN011016,Public legal basis for SME support
+SRC002,SME and Entrepreneurship Policy in Viet Nam,OECD,https://www.oecd.org/en/publications/sme-and-entrepreneurship-policy-in-viet-nam_30c79519-en/full-report/component-12.html,Background on SME policy and support ecosystem
+SRC003,Statistical Yearbook of Viet Nam 2024,National Statistics Office of Viet Nam,https://www.nso.gov.vn/en/default/2026/01/statistical-yearbook-of-viet-nam-2024-2/,Enterprise and macro statistics reference
+SRC004,Vietnam SME Support Policies 2025,Vinex,https://www.vinex.com.vn/post/vietnam-sme-support-policies-2025-tax-exemptions-preferential-loans-and-innovation-incentives,Public article on SME support policy themes
+SRC005,Viet Nam SME database,UNU-WIDER,https://www.wider.unu.edu/database/viet-nam-sme-database,Potential public SME survey data source
+SRC_DEMO,Demo internal policy sample,Generated for hackathon prototype,local sample only,Used for demo records that simulate bank policy updates

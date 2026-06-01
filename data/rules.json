@@ -1,0 +1,17 @@
+{
+  "score_thresholds": {
+    "low": [0, 39],
+    "medium": [40, 69],
+    "high": [70, 100]
+  },
+  "base_rules": [
+    {"name": "policy_applies_to_all", "condition": "sector_tags contains all", "score": 10, "reason": "Policy applies broadly to SMEs."},
+    {"name": "sector_match", "condition": "sme sector appears in sector_tags", "score": 20, "reason": "Policy matches the SME sector."},
+    {"name": "has_bank_loan", "condition": "has_bank_loan is yes and policy_type is credit/tax/compliance", "score": 15, "reason": "SME has a banking relationship that may be affected."},
+    {"name": "loan_renewal", "condition": "loan_stage is renewal and policy mentions renewal/cashflow/revenue", "score": 25, "reason": "SME is near loan renewal and policy affects required documents."},
+    {"name": "missing_required_documents", "condition": "missing_documents overlaps policy keywords", "score": 25, "reason": "Policy requires documents currently missing or incomplete."},
+    {"name": "unstable_cashflow", "condition": "cashflow_status is unstable or seasonal and policy mentions cashflow", "score": 15, "reason": "Cashflow instability increases preparation risk."},
+    {"name": "weak_tax_status", "condition": "tax_compliance_status is low/medium and policy mentions tax/invoice", "score": 15, "reason": "Tax or invoice readiness may affect compliance and loan review."},
+    {"name": "digital_invoice_gap", "condition": "digital_invoice_status is partial/not_ready and policy mentions invoice", "score": 15, "reason": "Digital invoice records are not fully ready."}
+  ]
+}
