@@ -45,7 +45,6 @@ policyguard_sme_project/
     ├── data_notes.md
     └── hackathon_plan.md
 
-``
 How to Run
 
 1. Clone the project
