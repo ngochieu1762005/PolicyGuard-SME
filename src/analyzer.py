@@ -1,147 +1,87 @@
 import json
 from pathlib import Path
 
-import pandas as pd
-
-BASE = Path(__file__).resolve().parents[1]
-DATA = BASE / "data"
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 
-def get_data():
-    smes = pd.read_csv(DATA / "sme_profiles.csv")
-    docs = pd.read_csv(DATA / "policies.csv")
-
-    with open(DATA / "rules.json", "r", encoding="utf-8") as f:
-        rules = json.load(f)
-
-    return smes, docs, rules
+def load_rules() -> dict:
+    return json.loads((BASE_DIR / "data" / "rules.json").read_text(encoding="utf-8"))
 
 
-def cut_list(text):
-    if pd.isna(text):
+def text_has_any(text: str, words: list[str]) -> bool:
+    low = text.lower()
+    return any(w.lower() in low for w in words)
+
+
+def split_items(value) -> list[str]:
+    if value is None:
         return []
-
-    text = str(text).replace(",", ";")
-    return [x.strip().lower() for x in text.split(";") if x.strip()]
+    return [x.strip() for x in str(value).split(";") if x.strip()]
 
 
-def level(score):
-    if score >= 70:
-        return "Cao"
-    if score >= 40:
-        return "Trung bình"
-    return "Thấp"
-
-
-def has_any(text, words):
-    text = text.lower()
-    return any(w in text for w in words)
-
-
-def add_task(tasks, text):
-    if text not in tasks:
-        tasks.append(text)
-
-
-def run_check(sme, doc, rules=None):
-    sector = str(sme.get("sector", "")).lower()
-    tags = cut_list(doc.get("sector_tags", ""))
-    miss = cut_list(sme.get("missing_documents", ""))
-    doc_type = str(doc.get("policy_type", "")).lower()
-
-    full_text = " ".join(
-        [
-            str(doc.get("title", "")),
-            str(doc.get("summary", "")),
-            str(doc.get("keywords", "")),
-            doc_type,
-        ]
-    ).lower()
-
+def analyze_policy(policy_text: str, sme: dict, rules: dict) -> dict:
     score = 0
-    why = []
-    tasks = []
+    matched_topics = []
+    required_docs = []
+    reasons = []
 
-    if "all" in tags:
-        score += 10
-        why.append("Chính sách có phạm vi áp dụng rộng cho nhiều nhóm SME.")
+    for topic, rule in rules.items():
+        if text_has_any(policy_text, rule.get("keywords", [])):
+            matched_topics.append(topic)
+            score += int(rule.get("base_score", 0))
+            required_docs.extend(rule.get("documents", []))
+            reasons.append(f"The policy contains terms related to {topic.replace('_', ' ')}.")
 
-    if sector and sector in tags:
+    if str(sme.get("has_bank_loan", "")).lower() == "yes" and "loan" in matched_topics:
+        score += 25
+        reasons.append("The SME has an active bank loan, so loan-related requirements are more relevant.")
+
+    loan_stage = str(sme.get("loan_stage", "")).lower()
+    if "renewal" in loan_stage and "loan" in matched_topics:
         score += 20
-        why.append("Ngành của doanh nghiệp nằm trong nhóm bị ảnh hưởng.")
+        reasons.append("The SME has an upcoming loan renewal, which increases urgency.")
 
-    has_loan = str(sme.get("has_bank_loan", "")).lower() == "yes"
-    if has_loan and has_any(doc_type, ["credit", "tax", "compliance"]):
-        score += 15
-        why.append("Doanh nghiệp đang có khoản vay nên thay đổi chính sách có thể ảnh hưởng đến rà soát hồ sơ.")
-
-    renew = str(sme.get("loan_stage", "")).lower() == "renewal"
-    if renew and has_any(full_text, ["renewal", "cashflow", "revenue", "loan"]):
-        score += 25
-        why.append("Doanh nghiệp đang ở giai đoạn gia hạn vay, trong khi văn bản có nhắc đến hồ sơ/dòng tiền/doanh thu.")
-        add_task(tasks, "Chuẩn bị bộ hồ sơ gia hạn vay và xác nhận thời hạn với nhân viên ngân hàng.")
-
-    if any(item in full_text for item in miss):
-        score += 25
-        why.append("Một số giấy tờ văn bản yêu cầu đang nằm trong nhóm hồ sơ còn thiếu của doanh nghiệp.")
-
-    cash = str(sme.get("cashflow_status", "")).lower()
-    if cash in ["unstable", "seasonal"] and "cashflow" in full_text:
-        score += 15
-        why.append("Dòng tiền của doanh nghiệp chưa ổn định, trong khi chính sách yêu cầu bằng chứng dòng tiền.")
-        add_task(tasks, "Tổng hợp sao kê và báo cáo dòng tiền 6 tháng gần nhất.")
-
-    tax = str(sme.get("tax_compliance_status", "")).lower()
-    if tax in ["low", "medium"] and has_any(full_text, ["tax", "invoice"]):
-        score += 15
-        why.append("Mức sẵn sàng về thuế/hóa đơn chưa cao nên cần kiểm tra lại trước khi nộp hồ sơ.")
-        add_task(tasks, "Rà soát tờ khai thuế, hóa đơn và chứng từ doanh thu.")
-
-    inv = str(sme.get("digital_invoice_status", "")).lower()
-    if inv in ["partial", "not_ready"] and "invoice" in full_text:
-        score += 15
-        why.append("Dữ liệu hóa đơn điện tử chưa hoàn chỉnh.")
-        add_task(tasks, "Xuất và kiểm tra dữ liệu hóa đơn điện tử trong kỳ gần nhất.")
-
-    if "revenue" in full_text:
-        add_task(tasks, "Chuẩn bị bằng chứng doanh thu: hợp đồng, hóa đơn, POS export hoặc sao kê ngân hàng.")
-    if "tax" in full_text:
-        add_task(tasks, "Kiểm tra trạng thái nộp thuế và các khoản còn thiếu nếu có.")
-    if "business plan" in full_text:
-        add_task(tasks, "Cập nhật kế hoạch kinh doanh và mục đích sử dụng vốn.")
-    if "environment" in full_text:
-        add_task(tasks, "Chuẩn bị giấy tờ liên quan đến vận hành/môi trường nếu ngành nghề yêu cầu.")
-
-    if not why:
-        why.append("Chưa thấy liên hệ mạnh giữa chính sách này và hồ sơ doanh nghiệp. Theo dõi là đủ ở giai đoạn hiện tại.")
-
-    if not tasks:
-        tasks.append("Theo dõi chính sách và hỏi nhân viên quan hệ khách hàng nếu có yêu cầu hồ sơ mới.")
+    missing = split_items(sme.get("missing_documents", ""))
+    if missing:
+        missing_low = "; ".join(missing).lower()
+        hits = [doc for doc in required_docs if doc.lower() in missing_low]
+        if hits:
+            score += 15
+            reasons.append("Some documents required by the policy are currently missing in the SME profile.")
 
     score = min(score, 100)
+    if score >= 70:
+        level = "High"
+    elif score >= 40:
+        level = "Medium"
+    else:
+        level = "Low"
+
+    checklist = []
+    for item in required_docs:
+        clean = item.strip()
+        if clean and clean not in checklist:
+            checklist.append(clean)
+
+    if "loan" in matched_topics:
+        checklist.append("Contact the bank relationship manager before the loan deadline")
+    if "tax" in matched_topics:
+        checklist.append("Review tax payment status and keep payment proof")
+    if "invoice" in matched_topics:
+        checklist.append("Organize e-invoice records and sales invoice summaries")
+
+    final_checklist = []
+    for item in checklist:
+        if item not in final_checklist:
+            final_checklist.append(item)
+
+    if not reasons:
+        reasons.append("No strong match was found between this policy and the SME profile.")
 
     return {
         "score": score,
-        "level": level(score),
-        "reasons": why,
-        "tasks": tasks,
-        "summary": doc.get("summary", ""),
+        "level": level,
+        "topics": matched_topics,
+        "reasons": reasons,
+        "checklist": final_checklist[:8],
     }
-
-
-def ask_bot(q, sme, doc, res):
-    q = q.lower().strip()
-
-    if has_any(q, ["vì sao", "tại sao", "why", "lý do", "anh huong", "ảnh hưởng"]):
-        return "Mức ảnh hưởng được tính dựa trên: " + "; ".join(res["reasons"])
-
-    if has_any(q, ["chuẩn bị", "giấy tờ", "document", "need", "cần làm"]):
-        return "Các việc nên làm: " + "; ".join(res["tasks"])
-
-    if has_any(q, ["tóm tắt", "summary", "nội dung", "noi dung"]):
-        return "Tóm tắt: " + str(res["summary"])
-
-    return (
-        f"Với hồ sơ của {sme.get('business_name')}, chính sách này đang được đánh giá ở mức "
-        f"{res['level']} với điểm {res['score']}/100. Việc nên ưu tiên: {res['tasks'][0]}"
-    )

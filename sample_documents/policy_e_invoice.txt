@@ -1,4 +1,0 @@
-E-INVOICE COMPLIANCE REQUIREMENTS FOR BUSINESS TRANSACTIONS
-Effective date: 2024-07-01
-
-Businesses should maintain compliant electronic invoice records and ensure invoice data is consistent with revenue declaration. Missing digital invoice records may delay tax review, credit document assessment, and business verification processes.

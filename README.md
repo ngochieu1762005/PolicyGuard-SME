@@ -1,59 +1,72 @@
-# PolicyGuard SME
+# PolicyGuard SME RAG
 
-PolicyGuard SME is a demo web application that helps small and medium-sized enterprises understand how new policy or banking-related requirements may affect their business documents, loan renewal process, tax preparation, and compliance tasks.
+PolicyGuard SME is a modern demo web application for small and medium-sized enterprises. It helps SMEs understand how policy, tax, invoice, and banking-related requirements may affect loan renewal, business documents, and compliance tasks.
 
-The system allows users to select an SME profile and a sample policy document, then generates an impact analysis with a risk level, explanation, and suggested action checklist. The goal of this project is to make policy information easier to understand and help SMEs prepare required documents earlier.
-
-This project was developed as a hackathon prototype. It uses sample data and a transparent rule-based scoring approach to demonstrate the main workflow. It is not intended to replace legal, tax, or financial advice.
+This version includes a simple RAG chatbot. The app retrieves relevant policy context from the local document folder, then uses an OpenAI model if an API key is available. If no API key is provided, the app still runs with a local fallback answer.
 
 ## Main Features
 
-* Select an SME profile from sample data
-* Select a policy or requirement document
-* Analyze how the policy affects the selected SME
-* Generate an impact score and risk level
-* Show reasons behind the result
-* Suggest an action checklist for the SME
-* Display the result in a simple Streamlit dashboard
+- White, modern Streamlit web interface
+- SME profile selection
+- Policy document selection
+- Custom policy text input
+- Local RAG retrieval from policy documents
+- Optional OpenAI-powered chatbot
+- Impact score and risk level
+- Explanation of why a policy affects the SME
+- Action checklist for required documents
+- Markdown report export
+- Public source references included in the dataset
 
 ## Project Structure
 
 ```text
-policyguard_sme_project/
+PolicyGuard-SME-RAG/
 ├── app.py
 ├── requirements.txt
+├── .env.example
+├── .gitignore
 ├── run_app.bat
 ├── run_app.sh
 ├── data/
 │   ├── sme_profiles.csv
-│   ├── policies.csv
 │   ├── rules.json
-│   └── source_references.csv
-├── sample_documents/
-│   ├── policy_loan_renewal.txt
-│   ├── policy_e_invoice.txt
-│   └── policy_sme_support.txt
-├── src/
-│   └── analyzer.py
-└── docs/
-    ├── data_notes.md
-    └── hackathon_plan.md
+│   └── sources.csv
+├── documents/
+│   ├── 01_sme_support_law.md
+│   ├── 02_e_invoice_decree.md
+│   ├── 03_tax_risk_and_penalty.md
+│   ├── 04_sme_credit_guarantee.md
+│   └── 05_loan_renewal_document_check.md
+└── src/
+    ├── __init__.py
+    ├── analyzer.py
+    ├── data_loader.py
+    ├── llm.py
+    ├── report.py
+    └── retriever.py
 ```
 
 ## How to Run
 
-### 1. Clone the project
-
-```bash
-git clone https://github.com/ngochieu1762005/PolicyGuard-SME
-cd PolicyGuard-SME
-```
-
-### 2. Install dependencies
+### 1. Install dependencies
 
 ```bash
 python -m pip install -r requirements.txt
 ```
+
+### 2. Add your API key
+
+Copy `.env.example` and rename it to `.env`.
+
+```env
+OPENAI_API_KEY=your_api_key_here
+OPENAI_MODEL=gpt-4o-mini
+USE_OPENAI_EMBEDDINGS=false
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+```
+
+Do not upload `.env` to GitHub.
 
 ### 3. Run the application
 
@@ -61,15 +74,13 @@ python -m pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-The application will open in your browser at:
+The app will open at:
 
 ```text
 http://localhost:8501
 ```
 
 ## Run on Windows
-
-You can also run the project using:
 
 ```bash
 run_app.bat
@@ -83,22 +94,20 @@ bash run_app.sh
 
 ## Demo Workflow
 
-1. Open the Streamlit application.
-2. Choose an SME profile from the sidebar.
-3. Choose a policy document.
-4. Run the analysis.
-5. Review the impact score, risk level, explanation, and recommended action checklist.
-
-Example:
+1. Open the Streamlit app.
+2. Select an SME profile from the sidebar.
+3. Select a policy document.
+4. Review the impact score and risk level.
+5. Check the reasons and action checklist.
+6. Ask the RAG chatbot questions such as:
 
 ```text
-SME: Demo Retail Company
-Policy: Loan renewal document requirement
-Result: High impact
-Reason: The SME has an active loan and missing cash flow documents.
-Recommended action: Prepare cash flow report, revenue proof, and contact the bank before renewal.
+Why is this policy high impact for this SME?
+What documents should the SME prepare?
+Does invoice compliance affect loan renewal?
+Summarize this policy in simple words.
 ```
 
-## Notes
+## Data Notes
 
-The data used in this project is sample data for demonstration only. It does not contain real banking customer information or confidential business data.
+The project uses sample SME profiles and short policy knowledge documents. The policy notes are built from public sources and rewritten for demo purposes. They are not official legal text and should not be used as legal, tax, or financial advice.

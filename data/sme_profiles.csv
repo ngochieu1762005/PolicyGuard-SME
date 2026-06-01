@@ -1,6 +1,6 @@
-sme_id,business_name,sector,province,employee_count,annual_revenue_vnd,has_bank_loan,loan_amount_vnd,loan_stage,missing_documents,cashflow_status,tax_compliance_status,digital_invoice_status
-SME001,Cong ty TNHH Demo Retail,ban_le,Ho Chi Minh,120,28500000000,yes,5000000000,renewal,"cashflow_statement;revenue_evidence;tax_declaration",unstable,medium,partial
-SME002,Cong ty TNHH AnFood,F_and_B,Ha Noi,45,9200000000,yes,1200000000,new_application,"business_plan;revenue_evidence",seasonal,medium,not_ready
-SME003,Cong ty May Minh Phat,san_xuat,Bac Ninh,220,67000000000,yes,18000000000,monitoring,"environment_report;labor_contracts",stable,good,ready
-SME004,Cong ty Logistics Xanh,logistics,Da Nang,80,18000000000,no,0,none,"cashflow_statement",stable,good,ready
-SME005,Cong ty Thuong mai Hoa Sen,thuong_mai,Can Tho,30,5600000000,yes,800000000,renewal,"tax_declaration;digital_invoice_records",unstable,low,partial
+id,business_name,sector,province,employees,annual_revenue_vnd,has_bank_loan,loan_stage,missing_documents,risk_notes
+SME001,Green Retail Co.,Retail,Hanoi,42,18500000000,Yes,Renewal in 60 days,"cash flow report; revenue proof; e-invoice records","Revenue is seasonal and documentation is incomplete"
+SME002,AnFood Services,F&B,Da Nang,28,9200000000,Yes,New loan application,"tax declaration; sales invoices; business plan","High cash usage and unstable monthly sales"
+SME003,Minh Logistics,Logistics,Ho Chi Minh City,75,42000000000,Yes,Active loan,"fuel cost statements; delivery contracts","Cost pressure due to fuel and delayed customer payments"
+SME004,BrightEdu Center,Education Services,Hanoi,18,6100000000,No,None,"e-invoice registration; service contracts","Needs to improve invoice compliance before future financing"
+SME005,Blue Textile Workshop,Manufacturing,Bac Ninh,110,73500000000,Yes,Renewal in 30 days,"audited financial statement; payroll records; tax payment proof","Large working capital need and upcoming renewal deadline"
